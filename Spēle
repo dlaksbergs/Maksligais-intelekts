@@ -1,0 +1,127 @@
+import tkinter as tk
+
+class Spēle:
+    
+    def __init__(self, master):
+        self.master = master
+        master.title("Spēle")
+        self.n = 10
+        self.player = 1
+        self.first_player = 1  
+        self.mi_gajieni = 0
+
+        self.choice_frame = tk.Frame(master)
+        self.game_frame = tk.Frame(master)
+       
+
+        self.choice_label = tk.Label(self.choice_frame, text="Izvēlies, kurš sāks pirmais:")
+        self.human_button = tk.Button(self.choice_frame, text="Cilvēks", command=lambda: self.pirmais_speletajs(1))
+        self.ai_button = tk.Button(self.choice_frame, text="Mākslīgais intelekts", command=lambda: self.pirmais_speletajs(2))
+
+
+        self.Kaudze_label = tk.Label(self.game_frame, text="Kaudze: {}".format(self.n))
+        self.move_entry = tk.Entry(self.game_frame, width=10)
+        self.submit_button = tk.Button(self.game_frame, text="Atņemt", command=self.kustiba)
+
+        self.choice_label.pack()
+        self.human_button.pack()
+        self.ai_button.pack()
+
+        self.choice_frame.pack()
+
+    def virsotnes_vert(self, n):
+        if n == 0:
+            return -1
+        elif n == 1:
+            return 1
+        elif n == 2:
+            return 0
+        else:
+            return -self.virsotnes_vert(n-2)
+
+    def mint_kust(self, Kaudze, alfa, beta):
+
+        labaka_vert = float('-inf')
+        labakais_gajiens = None
+        for gajiens in range(1, 4):
+            if Kaudze - gajiens < 0:
+                break
+            vert = self.virsotnes_vert(Kaudze - gajiens)
+            if vert > labaka_vert:
+                labaka_vert = vert
+                labakais_gajiens = gajiens
+            alfa = max(alfa, vert)
+            if alfa >= beta:
+                break
+        self.mi_gajieni += 1
+        if self.mi_gajieni>3:
+            result = "Tu zaudēji"
+            self.result_label = tk.Label(self.game_frame, text=result)
+            self.result_label.pack()
+            self.submit_button.config(state='disabled')
+            self.close_button = tk.Button(self.game_frame, text="Aizvērt", command=self.master.destroy)
+            self.close_button.pack()
+            self.velreiz_button = tk.Button(self.master, text="Spēlēt vēlreiz", command=self.velreiz)
+            self.velreiz_button.pack()  
+        return labakais_gajiens
+    def pirmais_speletajs(self, player):
+        self.first_player = player
+        self.player = player
+
+        self.Kaudze_label.pack()
+        self.move_entry.pack()
+        self.submit_button.pack()
+
+        self.choice_frame.pack_forget()
+        self.game_frame.pack()
+
+        self.atjaun()
+
+    def kustiba(self):
+        gajiens = int(self.move_entry.get())
+        if gajiens < 1 or gajiens > min(self.n, 3):
+            print("Izvēlies skaitli no 1-3")
+            return
+
+        self.n -= gajiens
+        self.player = 3 - self.player
+        self.atjaun()
+
+        if self.player == 2:
+            gajiens = self.mint_kust(self.n, float('-inf'), float('inf'))
+            self.n -= gajiens
+            self.player = 3 - self.player
+            self.atjaun()
+            
+                
+    def velreiz(self):
+        self.master.destroy()
+        new_game = tk.Tk()
+        new_game.geometry("200x160")
+
+        game = Spēle(new_game)
+
+    def atjaun(self):
+        self.Kaudze_label.config(text="Kaudze: {}".format(self.n))
+        self.move_entry.delete(0, tk.END)
+        if self.player == 2 and self.first_player == 2:
+            gajiens = self.mint_kust(self.n, float('-inf'), float('inf'))
+            self.n -= gajiens
+            self.player = 3 - self.player
+            self.atjaun()
+
+        if self.n == 0:
+                if self.player == self.first_player:
+                    result = "Tu uzvarēji"
+                    self.result_label = tk.Label(self.game_frame, text=result)
+                    self.result_label.pack()
+                    self.close_button = tk.Button(self.game_frame, text="Aizvērt", command=self.master.destroy)
+                    self.close_button.pack()
+                    self.velreiz_button = tk.Button(self.master, text="Spēlēt vēlreiz", command=self.velreiz)
+                    self.velreiz_button.pack()
+                    self.submit_button.config(state='disabled')
+if __name__ == '__main__':
+    root = tk.Tk()
+    root.geometry("200x160")
+    game = Spēle(root)
+    root.mainloop()
