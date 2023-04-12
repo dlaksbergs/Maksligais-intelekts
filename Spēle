@@ -39,7 +39,7 @@ class Spēle:
         else:
             return -self.virsotnes_vert(n-2)
 
-    def mint_kust(self, Kaudze, alfa, beta):
+    def mint_kust(self, Kaudze):
 
         labaka_vert = float('-inf')
         labakais_gajiens = None
@@ -50,9 +50,7 @@ class Spēle:
             if vert > labaka_vert:
                 labaka_vert = vert
                 labakais_gajiens = gajiens
-            alfa = max(alfa, vert)
-            if alfa >= beta:
-                break
+
         self.mi_gajieni += 1
         if self.mi_gajieni>3:
             result = "Tu zaudēji"
@@ -88,7 +86,7 @@ class Spēle:
         self.atjaun()
 
         if self.player == 2:
-            gajiens = self.mint_kust(self.n, float('-inf'), float('inf'))
+            gajiens = self.mint_kust(self.n)
             self.n -= gajiens
             self.player = 3 - self.player
             self.atjaun()
@@ -105,7 +103,7 @@ class Spēle:
         self.Kaudze_label.config(text="Kaudze: {}".format(self.n))
         self.move_entry.delete(0, tk.END)
         if self.player == 2 and self.first_player == 2:
-            gajiens = self.mint_kust(self.n, float('-inf'), float('inf'))
+            gajiens = self.mint_kust(self.n)
             self.n -= gajiens
             self.player = 3 - self.player
             self.atjaun()
